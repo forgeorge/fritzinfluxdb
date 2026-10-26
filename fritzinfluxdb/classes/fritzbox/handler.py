@@ -72,6 +72,7 @@ class FritzBoxHandlerBase:
                 new_service.interval = self.config.request_interval
 
             self.services.append(new_service)
+            log.debug(f"Successfully added FritzBox service '{new_service.name}'")
 
     def query_service_data(self, _):
         # stub for the default function

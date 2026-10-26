@@ -12,6 +12,7 @@ import pytz
 
 from fritzinfluxdb.log import get_logger
 from fritzinfluxdb.classes.common import ConfigBase
+from fritzinfluxdb.classes.fritzbox.service_groups import SERVICE_GROUP_MODULES
 
 log = get_logger()
 
@@ -66,6 +67,10 @@ class FritzBoxConfig(ConfigBase):
         "type": str,
         "default": "Europe/Berlin"
     }
+    services = {
+        "type": str,
+        "default": "all"
+    }
 
     config_section_name = "fritzbox"
 
@@ -85,6 +90,22 @@ class FritzBoxConfig(ConfigBase):
         if getattr(self, "request_interval") < min_request_interval:
             log.info(f"Setting minimum FritzBox request interval to {min_request_interval} seconds")
             self.request_interval = min_request_interval
+
+        configured_services = [service.strip().lower() for service in self.services.split(",") if service.strip()]
+        if not configured_services or configured_services == ["all"]:
+            self.services = list(SERVICE_GROUP_MODULES)
+        elif "all" in configured_services:
+            self.parser_error = True
+            log.error("'all' cannot be combined with individual FritzBox services")
+        else:
+            unknown_services = sorted(set(configured_services) - set(SERVICE_GROUP_MODULES))
+            if unknown_services:
+                self.parser_error = True
+                log.error(
+                    f"Unknown FritzBox service group(s): {', '.join(unknown_services)}. "
+                    f"Available groups: {', '.join(SERVICE_GROUP_MODULES)}"
+                )
+            self.services = list(dict.fromkeys(configured_services))
 
         # validate data
         for key in ["username", "password"]:

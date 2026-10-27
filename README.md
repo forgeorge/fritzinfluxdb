@@ -44,9 +44,13 @@ This is normal as there are values not available on certain models.
 After cloning the repo copy the config from the [example](https://github.com/bb-Ricardo/fritzinfluxdb/blob/main/fritzinfluxdb-sample.ini)
 to ```fritzinfluxdb.ini``` and edit the settings. All settings are described inside the file.
 
-To limit the data collected, set `services` in the `[fritzbox]` section to a comma-separated list of service groups.
-Available groups are `connection_info`, `homeauto`, `logs`, `network_hosts`, `system_stats`, `telephone_list`,
-`tr069`, and `vpn_data`. The default is `all`, which keeps all service groups enabled.
+To limit the data collected, configure each `services_<group>` option in the `[fritzbox]` section. Each option accepts
+`all`, `none`, or a comma-separated list of service IDs. Omitted options default to `all`. Service IDs are derived from
+the service name by lowercasing it and replacing runs of non-alphanumeric characters with underscores. Available IDs
+are listed in the comments in `fritzinfluxdb-sample.ini`.
+
+For example, `services_logs = system_logs,wlan_logs` enables only system and WLAN logs, while
+`services_homeauto = none` disables home automation.
 
 #### Environment variables
 

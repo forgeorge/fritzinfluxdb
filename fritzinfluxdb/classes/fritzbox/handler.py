@@ -112,7 +112,7 @@ class FritzBoxHandler(FritzBoxHandlerBase):
 
         super().__init__(config)
 
-        tr069_services, _ = service_definitions.get_services(self.config.services)
+        tr069_services, _ = service_definitions.get_services(self.config.selected_services)
         self.add_services(FritzBoxTR069Service, tr069_services)
 
     def connect(self):
@@ -306,7 +306,7 @@ class FritzBoxLuaHandler(FritzBoxHandlerBase):
         self.session = requests.Session()
         self.session.verify = self.config.verify_tls
 
-        _, lua_services = service_definitions.get_services(self.config.services)
+        _, lua_services = service_definitions.get_services(self.config.selected_services)
         self.add_services(FritzBoxLuaService, lua_services)
 
     def connect(self):

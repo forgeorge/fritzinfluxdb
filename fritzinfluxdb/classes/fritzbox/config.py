@@ -8,6 +8,7 @@
 #  repository or visit: <https://opensource.org/licenses/MIT>.
 
 import configparser
+import os
 import pytz
 
 from fritzinfluxdb.log import get_logger
@@ -67,10 +68,14 @@ class FritzBoxConfig(ConfigBase):
         "type": str,
         "default": "Europe/Berlin"
     }
-    services = {
-        "type": str,
-        "default": "all"
-    }
+    services_connection_info = {"type": str, "default": "all"}
+    services_homeauto = {"type": str, "default": "all"}
+    services_logs = {"type": str, "default": "all"}
+    services_network_hosts = {"type": str, "default": "all"}
+    services_system_stats = {"type": str, "default": "all"}
+    services_telephone_list = {"type": str, "default": "all"}
+    services_tr069 = {"type": str, "default": "all"}
+    services_vpn_data = {"type": str, "default": "all"}
 
     config_section_name = "fritzbox"
 
@@ -91,21 +96,42 @@ class FritzBoxConfig(ConfigBase):
             log.info(f"Setting minimum FritzBox request interval to {min_request_interval} seconds")
             self.request_interval = min_request_interval
 
-        configured_services = [service.strip().lower() for service in self.services.split(",") if service.strip()]
-        if not configured_services or configured_services == ["all"]:
-            self.services = list(SERVICE_GROUP_MODULES)
-        elif "all" in configured_services:
-            self.parser_error = True
-            log.error("'all' cannot be combined with individual FritzBox services")
-        else:
-            unknown_services = sorted(set(configured_services) - set(SERVICE_GROUP_MODULES))
-            if unknown_services:
+        from fritzinfluxdb.classes.fritzbox import service_definitions
+
+        available_service_ids = service_definitions.get_service_ids()
+        self.selected_services = {
+            group_name: set(ids)
+            for group_name, ids in available_service_ids.items()
+        }
+
+        for group_name in SERVICE_GROUP_MODULES:
+            option_name = f"services_{group_name}"
+            if not config_data.has_option(self.config_section_name, option_name) and \
+                    f"{self.config_section_name}_{option_name}".upper() not in os.environ:
+                continue
+
+            configured_services = self._parse_service_list(getattr(self, option_name))
+            if not configured_services:
                 self.parser_error = True
-                log.error(
-                    f"Unknown FritzBox service group(s): {', '.join(unknown_services)}. "
-                    f"Available groups: {', '.join(SERVICE_GROUP_MODULES)}"
-                )
-            self.services = list(dict.fromkeys(configured_services))
+                log.error(f"FritzBox option '{option_name}' must contain 'all', 'none', or service IDs")
+            elif configured_services == {"all"}:
+                self.selected_services[group_name] = set(available_service_ids[group_name])
+            elif configured_services == {"none"}:
+                self.selected_services[group_name] = set()
+            elif "all" in configured_services or "none" in configured_services:
+                self.parser_error = True
+                log.error(f"FritzBox option '{option_name}' cannot combine 'all' or 'none' with service IDs")
+            else:
+                unknown_services = configured_services - available_service_ids[group_name]
+                if unknown_services:
+                    self.parser_error = True
+                    log.error(
+                        f"Unknown service ID(s) for FritzBox group '{group_name}': "
+                        f"{', '.join(sorted(unknown_services))}. "
+                        f"Available IDs: {', '.join(sorted(available_service_ids[group_name]))}"
+                    )
+                else:
+                    self.selected_services[group_name] = configured_services
 
         # validate data
         for key in ["username", "password"]:
@@ -123,6 +149,14 @@ class FritzBoxConfig(ConfigBase):
         # set TR-069 TLS port if undefined
         if self.tls_enabled is True and self.port == self.__class__.port.get("default"):
             self.port += 443
+
+    @staticmethod
+    def _parse_service_list(value):
+        return {
+            service.strip().lower()
+            for service in value.split(",")
+            if service.strip()
+        }
 
     @property
     def fw_version(self):

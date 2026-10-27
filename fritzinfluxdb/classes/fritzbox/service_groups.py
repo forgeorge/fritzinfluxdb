@@ -17,3 +17,17 @@ SERVICE_GROUP_MODULES = {
     "tr069": "tr069",
     "vpn_data": "vpn_data"
 }
+
+
+def service_id(service_name):
+    """
+    Create a configuration-safe identifier from a service's display name.
+    """
+
+    return "_".join(
+        part for part in "".join(
+            character.lower() if character.isalnum() else " "
+            for character in service_name
+        ).split()
+        if part
+    )

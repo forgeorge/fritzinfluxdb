@@ -52,6 +52,10 @@ are listed in the comments in `fritzinfluxdb-sample.ini`.
 For example, `services_logs = system_logs,wlan_logs` enables only system and WLAN logs, while
 `services_homeauto = none` disables home automation.
 
+Application diagnostic messages are stored separately in InfluxDB with `log_type = FritzInfluxDB`. Set
+`write_application_logs = false` in `[fritzbox]` to disable those records. This does not affect console output or
+FritzBox event logs selected with `services_logs`.
+
 #### Environment variables
 
 Config values can also be overwritten using environment variables.<br>

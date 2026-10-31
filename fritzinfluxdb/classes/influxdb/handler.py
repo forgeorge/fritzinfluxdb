@@ -584,7 +584,12 @@ class InfluxLogAndConfigWriter:
         while True:
 
             while self.log_queue.empty() is False:
-                formatted_log_record = self.format_log_record(await self.log_queue.get())
+                log_record = await self.log_queue.get()
+
+                if self.config.write_application_logs is False:
+                    continue
+
+                formatted_log_record = self.format_log_record(log_record)
 
                 if formatted_log_record is None:
                     continue

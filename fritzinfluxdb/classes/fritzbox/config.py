@@ -68,6 +68,10 @@ class FritzBoxConfig(ConfigBase):
         "type": str,
         "default": "Europe/Berlin"
     }
+    write_application_logs = {
+        "type": bool,
+        "default": True
+    }
     services_connection_info = {"type": str, "default": "all"}
     services_homeauto = {"type": str, "default": "all"}
     services_logs = {"type": str, "default": "all"}

@@ -56,6 +56,11 @@ Application diagnostic messages are stored separately in InfluxDB with `log_type
 `write_application_logs = false` in `[fritzbox]` to disable those records. This does not affect console output or
 FritzBox event logs selected with `services_logs`.
 
+The `[influxdb]` option `precision` controls timestamp precision for writes to both InfluxDB 1 and 2. Supported values
+are `n`, `u`, `ms`, and `s`; the default `u` preserves the current write precision. Python `datetime` values support
+microsecond resolution, so `n` selects nanosecond write encoding but does not add sub-microsecond timestamp detail.
+
+
 #### Environment variables
 
 Config values can also be overwritten using environment variables.<br>

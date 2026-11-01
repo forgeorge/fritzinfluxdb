@@ -51,6 +51,10 @@ class InfluxDBConfig(ConfigBase):
         "type": int,
         "default": 365
     }
+    precision = {
+        "type": str,
+        "default": "u"
+    }
 
     # version 1 parameters
     username = {
@@ -85,6 +89,15 @@ class InfluxDBConfig(ConfigBase):
     def parse_config(self, config_data: configparser.ConfigParser):
 
         super().parse_config(config_data)
+
+        self.precision = self.precision.strip().lower()
+        if self.precision not in {"n", "u", "ms", "s"}:
+            log.error(
+                f"Invalid InfluxDB timestamp precision '{self.precision}'. "
+                "Supported values are n, u, ms, and s"
+            )
+            self.parser_error = True
+            self.precision = self.__class__.precision["default"]
 
         # validate data
         mandatory_keys = list()

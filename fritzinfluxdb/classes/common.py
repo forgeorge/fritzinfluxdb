@@ -19,6 +19,7 @@ log = get_logger()
 
 
 class WritePrecision(object):
+    N = "n"
     MS = "ms"
     S = "s"
     US = "us"
@@ -31,7 +32,7 @@ class FritzMeasurement:
     """
 
     default_box_tag_key = "box"
-    default_timestamp_precision = WritePrecision.S
+    default_timestamp_precision = WritePrecision.US
 
     __slots__ = ("name", "value", "box_tag", "timestamp", "additional_tags", "timestamp_precision")
 
@@ -72,8 +73,12 @@ class FritzMeasurement:
 
     def update_timestamp_precision(self, precision=None):
 
+        self.timestamp = self.timestamp_at_precision(precision)
+
+    def timestamp_at_precision(self, precision=None):
+
         if self.timestamp is None:
-            return
+            return None
 
         if precision is None:
             precision = self.default_timestamp_precision
@@ -82,9 +87,11 @@ class FritzMeasurement:
             raise ValueError(f"invalid timestamp precision '{precision}'")
 
         if precision == WritePrecision.MS:
-            self.timestamp = self.timestamp.replace(microsecond=int(self.timestamp.microsecond/1_000))
+            return self.timestamp.replace(microsecond=self.timestamp.microsecond // 1_000 * 1_000)
         elif precision == WritePrecision.S:
-            self.timestamp = self.timestamp.replace(microsecond=int(self.timestamp.microsecond/1_000_000))
+            return self.timestamp.replace(microsecond=0)
+
+        return self.timestamp
 
     def sanitize_value(self, value):
 

@@ -318,10 +318,17 @@ class InfluxHandler:
             log.error(f"Measurement needs to be a 'FritzMeasurement' but got '{type(measurement)}'")
             return
 
+        measurement_precision = {
+            "n": "n",
+            "u": "us",
+            "ms": "ms",
+            "s": "s"
+        }[self.config.precision]
+
         return {
             "measurement": self.config.measurement_name,
             "tags": measurement.tags,
-            "time": measurement.timestamp,
+            "time": measurement.timestamp_at_precision(measurement_precision),
             "fields": {measurement.name: measurement.value}
         }
 
@@ -367,10 +374,16 @@ class InfluxHandler:
         self.last_write_retry = datetime.now(pytz.utc)
         try:
             if self.config.version == 1:
-                write_successful = self.session_v1.write_points(data, time_precision="u")
+                write_successful = self.session_v1.write_points(data, time_precision=self.config.precision)
             elif self.config.version == 2:
+                write_precision = {
+                    "n": WritePrecision.NS,
+                    "u": WritePrecision.US,
+                    "ms": WritePrecision.MS,
+                    "s": WritePrecision.S
+                }[self.config.precision]
                 self.session_v2_write_api.write(bucket=self.config.bucket, record=data,
-                                                write_precision=WritePrecision.US)
+                                                write_precision=write_precision)
                 write_successful = True
         except (ApiException, InfluxDBClientError) as e:
 

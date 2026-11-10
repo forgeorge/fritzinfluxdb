@@ -27,12 +27,12 @@ from fritzinfluxdb.configparser import import_config
 from fritzinfluxdb.classes.fritzbox.handler import FritzBoxHandler, FritzBoxLuaHandler
 from fritzinfluxdb.classes.influxdb.handler import InfluxHandler, InfluxLogAndConfigWriter
 
-__version__ = "1.2.4"
-__version_date__ = "2024-10-15"
+__version__ = "1.2.5"
+__version_date__ = "2025-11-10"
 __author__ = "Ricardo Bartels <ricardo@bitchbrothers.com>"
 __description__ = "fritzinfluxdb"
 __license__ = "MIT"
-__url__ = "https://github.com/bb-Ricardo/fritzinfluxdb"
+__url__ = "https://github.com/forgeorge/fritzinfluxdb"
 
 
 # default vars

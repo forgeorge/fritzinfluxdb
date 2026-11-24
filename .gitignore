@@ -1,5 +1,8 @@
 .venv
-fritzinfluxdb.ini
+*.ini
+!*sample.ini
+*.service
+!fritzinfluxdb.service
 .idea
 __pycache__
 .DS_Store

@@ -4,11 +4,10 @@ Wants=network-online.target
 After=network-online.target
 
 [Service]
-DynamicUser=yes
+User=pi
 Type=simple
-WorkingDirectory=/opt/fritzinfluxdb
-ExecStart=/opt/fritzinfluxdb/.venv/bin/python /opt/fritzinfluxdb/fritzinfluxdb.py -d
-SyslogIdentifier=fritzinfluxdb
+WorkingDirectory=/home/pi/fritzinfluxdb
+ExecStart=/home/pi/fritzinfluxdb/venv/bin/python /home/pi/fritzinfluxdb/fritzinfluxdb.py -d
 RemainAfterExit=no
 Restart=always
 RestartSec=5s
